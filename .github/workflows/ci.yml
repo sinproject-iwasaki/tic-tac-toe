@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  merge_group:
+  pull_request:
+  push:
+    branches:
+      - main
+
+env:
+  NIGHTLY_TOOLCHAIN: nightly
+
+concurrency:
+  group: ${{github.workflow}}-${{github.ref}}
+  cancel-in-progress: ${{github.event_name == 'pull_request'}}
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/
+        key: ${{ runner.os }}-cargo-ci-${{ hashFiles('**/Cargo.toml') }}
+
+    - uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: ${{ env.NIGHTLY_TOOLCHAIN }}
+        components: rustfmt, clippy
+
+    - name: Install alsa and udev
+      run: sudo apt-get update; sudo apt-get install -y --no-install-recommends libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
+
+    - name: Install cargo outdated
+      run: cargo outdated --version || cargo install cargo-outdated
+
+    - name: Install cargo cargo-audit
+      run: cargo audit --version || cargo install cargo-audit
+
+    # - name: Install Rust
+      # run: |
+        # rustup set profile minimal
+        # rustup install nightly
+        # rustup override set nightly
+
+    - name: Check outdated
+      run: cargo outdated -R
+
+    - name: Check format
+      run: cargo fmt -- --check
+
+    - name: Lint with clippy
+      run: cargo clippy -- -D warnings
+
+    - name: Run tests
+      run: cargo test --verbose
+
+    # - name: Run integration tests
+    #   run: cargo test --tests --verbose
+
+    - name: Check audit
+      run: cargo audit

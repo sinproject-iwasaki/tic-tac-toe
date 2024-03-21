@@ -1,0 +1,29 @@
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "rust-lang.rust-analyzer",
+  "cSpell.words": [
+    "aarch",
+    "binaryen",
+    "bindgen",
+    "Cacher",
+    "clippy",
+    "Lefthook",
+    "minigrep",
+    "msvc",
+    "Noto",
+    "rngs",
+    "rstest",
+    "rustflags",
+    "rustfmt",
+    "rustup",
+    "Tetris",
+    "Validatable",
+    "wgpu",
+    "Winit",
+    "Zshare",
+    "Zthreads"
+  ],
+  "editor.tabSize": 4,
+  "rust-analyzer.linkedProjects": ["./Cargo.toml"],
+  "rust-analyzer.showUnlinkedFileNotification": false
+}
