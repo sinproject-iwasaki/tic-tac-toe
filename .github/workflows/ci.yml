@@ -1,11 +1,17 @@
-name: CI
+name: Rust + Bevy CI
 
 on:
   merge_group:
   pull_request:
   push:
-    branches:
-      - main
+    branches: [main]
+    paths:
+      - '**/*.rs'
+      - '**/*.toml'
+      - '**/*.ron'
+      - 'assets/**'
+      - 'src/**'
+      - 'Cargo.lock'
 
 env:
   NIGHTLY_TOOLCHAIN: nightly
@@ -31,7 +37,7 @@ jobs:
           ~/.cargo/registry/cache/
           ~/.cargo/git/db/
           target/
-        key: ${{ runner.os }}-cargo-ci-${{ hashFiles('**/Cargo.toml') }}
+        key: ${{ runner.os }}-cargo-ci-${{ hashFiles('**/Cargo.toml', '**/Cargo.lock') }}
 
     - uses: dtolnay/rust-toolchain@master
       with:
@@ -41,22 +47,15 @@ jobs:
     - name: Install alsa and udev
       run: sudo apt-get update; sudo apt-get install -y --no-install-recommends libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
 
-    - name: Install cargo outdated
-      run: cargo outdated --version || cargo install cargo-outdated
+    - name: Install cargo tools
+      run: |
+        cargo outdated --version || cargo install cargo-outdated
+        cargo audit --version || cargo install cargo-audit
 
-    - name: Install cargo cargo-audit
-      run: cargo audit --version || cargo install cargo-audit
-
-    # - name: Install Rust
-      # run: |
-        # rustup set profile minimal
-        # rustup install nightly
-        # rustup override set nightly
-
-    - name: Check outdated
+    - name: Check outdated dependencies
       run: cargo outdated -R
 
-    - name: Check format
+    - name: Check code format
       run: cargo fmt -- --check
 
     - name: Lint with clippy
@@ -65,8 +64,5 @@ jobs:
     - name: Run tests
       run: cargo test --verbose
 
-    # - name: Run integration tests
-    #   run: cargo test --tests --verbose
-
-    - name: Check audit
+    - name: Security audit
       run: cargo audit
