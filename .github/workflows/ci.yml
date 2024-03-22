@@ -3,6 +3,13 @@ name: Rust + Bevy CI
 on:
   merge_group:
   pull_request:
+    paths:
+      - '**/*.rs'
+      - '**/*.toml'
+      - '**/*.ron'
+      - 'assets/**'
+      - 'src/**'
+      - 'Cargo.lock'
   push:
     branches: [main]
     paths:
