@@ -46,9 +46,8 @@ jobs:
           target/
         key: ${{ runner.os }}-cargo-ci-${{ hashFiles('**/Cargo.toml', '**/Cargo.lock') }}
 
-    - uses: dtolnay/rust-toolchain@master
+    - uses: dtolnay/rust-toolchain@stable
       with:
-        toolchain: ${{ env.NIGHTLY_TOOLCHAIN }}
         components: rustfmt, clippy
 
     - name: Install alsa and udev
