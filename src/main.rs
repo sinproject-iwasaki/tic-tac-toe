@@ -2,5 +2,5 @@
 
 #[cfg_attr(coverage_nightly, coverage(off))]
 fn main() {
-    bevy_template::run();
+    tic_tac_toe::run();
 }

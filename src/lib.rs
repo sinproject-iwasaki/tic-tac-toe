@@ -8,13 +8,19 @@ use bevy_prototype_lyon::prelude::*;
 
 #[cfg_attr(coverage_nightly, coverage(off))]
 pub fn run() {
+    let plugins = wasm::get_plugins();
+
     App::new()
         .insert_resource(AssetMetaCheck::Never)
-        .add_plugins((wasm::get_plugins(), ShapePlugin))
+        .add_plugins((plugins, ShapePlugin))
         .add_systems(Startup, (setup, line::draw_rectangle, line::draw_lines))
         .run();
 }
 
-fn setup(mut commands: Commands) {
+fn spawn_camera(commands: &mut Commands) {
     commands.spawn(Camera2dBundle::default());
+}
+
+fn setup(mut commands: Commands) {
+    spawn_camera(&mut commands);
 }
