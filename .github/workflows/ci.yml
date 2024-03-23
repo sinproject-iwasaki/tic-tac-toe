@@ -20,9 +20,6 @@ on:
       - 'src/**'
       - 'Cargo.lock'
 
-env:
-  NIGHTLY_TOOLCHAIN: nightly
-
 concurrency:
   group: ${{github.workflow}}-${{github.ref}}
   cancel-in-progress: ${{github.event_name == 'pull_request'}}
@@ -33,42 +30,42 @@ jobs:
     timeout-minutes: 30
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Setup cache
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.cargo/bin/
-          ~/.cargo/registry/index/
-          ~/.cargo/registry/cache/
-          ~/.cargo/git/db/
-          target/
-        key: ${{ runner.os }}-cargo-ci-${{ hashFiles('**/Cargo.toml', '**/Cargo.lock') }}
+      - name: Setup cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-ci-${{ hashFiles('**/Cargo.toml', '**/Cargo.lock') }}
 
-    - uses: dtolnay/rust-toolchain@stable
-      with:
-        components: rustfmt, clippy
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
 
-    - name: Install alsa and udev
-      run: sudo apt-get update; sudo apt-get install -y --no-install-recommends libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
+      - name: Install alsa and udev
+        run: sudo apt-get update; sudo apt-get install -y --no-install-recommends libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
 
-    - name: Install cargo tools
-      run: |
-        cargo outdated --version || cargo install cargo-outdated
-        cargo audit --version || cargo install cargo-audit
+      - name: Install cargo tools
+        run: |
+          cargo outdated --version || cargo install cargo-outdated
+          cargo audit --version || cargo install cargo-audit
 
-    - name: Check outdated dependencies
-      run: cargo outdated -R
+      - name: Security audit
+        run: cargo audit
 
-    - name: Check code format
-      run: cargo fmt -- --check
+      - name: Check outdated dependencies
+        run: cargo outdated -R
 
-    - name: Lint with clippy
-      run: cargo clippy -- -D warnings
+      - name: Check code format
+        run: cargo fmt -- --check
 
-    - name: Run tests
-      run: cargo test --verbose
+      - name: Lint with clippy
+        run: cargo clippy -- -D warnings
 
-    - name: Security audit
-      run: cargo audit
+      - name: Run tests
+        run: cargo test --verbose
