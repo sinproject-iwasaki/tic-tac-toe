@@ -7,6 +7,8 @@ const RECTANGLE_WIDTH: f32 = 10.0;
 const MARGIN_LINES: f32 = 65.0;
 const LINE_WIDTH: f32 = 20.0;
 
+const MARGIN_MARK: f32 = 20.0;
+
 fn get_window_size(windows: &Query<&Window>) -> Vec2 {
     let window = windows.single();
     Vec2::new(window.width(), window.height())
@@ -32,10 +34,10 @@ pub fn draw_rectangle(mut commands: Commands, windows: Query<&Window>) {
 }
 
 fn spawn_line(commands: &mut Commands, start: Vec2, end: Vec2, color: Color, line_width: f32) {
-    let line = shapes::Line(start, end);
+    let shape = shapes::Line(start, end);
     commands.spawn((
         ShapeBundle {
-            path: GeometryBuilder::build_as(&line),
+            path: GeometryBuilder::build_as(&shape),
             ..default()
         },
         Stroke::new(color, line_width),
@@ -75,11 +77,17 @@ fn draw_grid_lines(
     }
 }
 
-pub fn draw_lines(mut commands: Commands, windows: Query<&Window>) {
+fn get_sizes(windows: Query<&Window>) -> (f32, f32) {
     let window_size = get_window_size(&windows);
     let min_size = window_size.x.min(window_size.y);
     let cell_size = ((min_size - MARGIN_LINES * 2.0) / 3.0).floor();
     let half_size = min_size / 2.0;
+
+    (cell_size, half_size)
+}
+
+pub fn draw_lines(mut commands: Commands, windows: Query<&Window>) {
+    let (cell_size, half_size) = get_sizes(windows);
 
     draw_grid_lines(
         &mut commands,
@@ -97,4 +105,28 @@ pub fn draw_lines(mut commands: Commands, windows: Query<&Window>) {
         half_size,
         LINE_WIDTH,
     );
+
+    draw_circle_outline(&mut commands, cell_size, LINE_WIDTH);
+}
+
+fn draw_circle_outline(commands: &mut Commands, cell_size: f32, line_width: f32) {
+    let radius = (cell_size) / 2.0 - line_width - MARGIN_MARK;
+    let offset_x = cell_size; // 左に1マス分のオフセット
+
+    let shape = shapes::Circle {
+        radius,
+        ..default()
+    };
+
+    commands.spawn((
+        ShapeBundle {
+            path: GeometryBuilder::build_as(&shape),
+            spatial: SpatialBundle {
+                transform: Transform::from_xyz(-offset_x, -offset_x, 0.),
+                ..default()
+            },
+            ..default()
+        },
+        Stroke::new(Color::WHITE, line_width),
+    ));
 }
