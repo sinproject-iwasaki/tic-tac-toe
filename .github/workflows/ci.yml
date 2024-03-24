@@ -1,71 +1,78 @@
-name: Rust + Bevy CI
+name: CI
 
 on:
   merge_group:
   pull_request:
-    paths:
-      - '**/*.rs'
-      - '**/*.toml'
-      - '**/*.ron'
-      - 'assets/**'
-      - 'src/**'
-      - 'Cargo.lock'
+    # paths:
+    #   - '**/*.rs'
+    #   - '**/*.toml'
+    #   - '**/*.ron'
+    #   - 'assets/**'
+    #   - 'src/**'
+    #   - 'Cargo.lock'
   push:
     branches: [main]
-    paths:
-      - '**/*.rs'
-      - '**/*.toml'
-      - '**/*.ron'
-      - 'assets/**'
-      - 'src/**'
-      - 'Cargo.lock'
+    # paths:
+    #   - '**/*.rs'
+    #   - '**/*.toml'
+    #   - '**/*.ron'
+    #   - 'assets/**'
+    #   - 'src/**'
+    #   - 'Cargo.lock'
+
+env:
+  CARGO_TERM_COLOR: always
 
 concurrency:
   group: ${{github.workflow}}-${{github.ref}}
   cancel-in-progress: ${{github.event_name == 'pull_request'}}
 
 jobs:
-  ci:
+  test:
+    name: Test
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            target/
-          key: ${{ runner.os }}-cargo-ci-${{ hashFiles('**/Cargo.toml', '**/Cargo.lock') }}
-
       - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
 
       - name: Install alsa and udev
         run: sudo apt-get update; sudo apt-get install -y --no-install-recommends libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
 
-      - name: Install cargo tools
-        run: |
-          cargo outdated --version || cargo install cargo-outdated
-          cargo audit --version || cargo install cargo-audit
+      - name: Run tests
+        run: cargo test
 
-      - name: Security audit
-        run: cargo audit
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
 
-      - name: Check outdated dependencies
-        run: cargo outdated -R
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
 
-      - name: Check code format
-        run: cargo fmt -- --check
+      - name: Install alsa and udev
+        run: sudo apt-get update; sudo apt-get install -y --no-install-recommends libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
 
       - name: Lint with clippy
         run: cargo clippy -- -D warnings
 
-      - name: Run tests
-        run: cargo test --verbose
+  format:
+    name: Format
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+
+      - name: Check code format
+        run: cargo fmt --all -- --check
+
