@@ -1,29 +1,25 @@
 pre-commit:
   parallel: true
   commands:
-    cargo-outdated:
-      run: cargo outdated -R
-    cargo-fmt:
-      # glob: "*.{rs,toml}"
-      run: cargo fmt -- --check
-    cargo-clippy:
-      run: cargo clippy -- -D warnings
-    cargo-test:
-      run: cargo test
-    # cargo-test-integration:
-    #   run: cargo test --tests
-    # cargo-test-doc:
-    #   run: cargo test --doc
     cargo-audit:
       run: cargo audit
+    cargo-outdated:
+      run: cargo outdated -R
+    cargo-test:
+      run: cargo test
+    cargo-clippy:
+      run: cargo clippy -- -D warnings
+    cargo-fmt:
+      # glob: "*.{rs,toml}"
+      run: cargo fmt --all -- --check
 
 pre-push:
   parallel: true
   commands:
-    cargo-test:
-      run: cargo test
     cargo-audit:
       run: cargo audit
+    cargo-test:
+      run: cargo test
     # cargo-benchmark:
     #   run: cargo bench
 # EXAMPLE USAGE:
