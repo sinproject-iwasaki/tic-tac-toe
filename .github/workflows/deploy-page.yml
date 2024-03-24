@@ -2,13 +2,15 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: 'main'
+    branches: [main]
+    paths:
+      - 'wasm/**'
 
 permissions:
   contents: write
 
 jobs:
-  build_site:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
