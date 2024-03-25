@@ -1,5 +1,6 @@
 #![cfg_attr(coverage_nightly, feature(coverage_attribute))]
 
+mod area;
 mod consts;
 mod lines;
 mod shapes;
@@ -22,6 +23,7 @@ pub fn run() {
                 setup,
                 lines::draw_rectangle,
                 lines::draw_lines,
+                area::draw_rectangle,
                 shapes::draw_shapes,
             ),
         )
