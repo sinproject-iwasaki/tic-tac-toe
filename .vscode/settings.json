@@ -7,6 +7,7 @@
     "bindgen",
     "Cacher",
     "clippy",
+    "consts",
     "Lefthook",
     "minigrep",
     "msvc",

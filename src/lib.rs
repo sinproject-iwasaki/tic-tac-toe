@@ -1,7 +1,10 @@
 #![cfg_attr(coverage_nightly, feature(coverage_attribute))]
 
-mod line;
+mod consts;
+mod lines;
+mod shapes;
 mod wasm;
+mod window;
 
 use bevy::{asset::AssetMetaCheck, prelude::*};
 use bevy_prototype_lyon::prelude::*;
@@ -13,7 +16,15 @@ pub fn run() {
     App::new()
         .insert_resource(AssetMetaCheck::Never)
         .add_plugins((plugins, ShapePlugin))
-        .add_systems(Startup, (setup, line::draw_rectangle, line::draw_lines))
+        .add_systems(
+            Startup,
+            (
+                setup,
+                lines::draw_rectangle,
+                lines::draw_lines,
+                shapes::draw_shapes,
+            ),
+        )
         .run();
 }
 
