@@ -8,6 +8,7 @@
     "Cacher",
     "clippy",
     "consts",
+    "despawn",
     "Lefthook",
     "minigrep",
     "msvc",
