@@ -1,3 +1,10 @@
+[build]
+rustc-wrapper = "sccache"
+# rustc-wrapper = "/opt/homebrew/bin/sccache"
+# export RUSTC_WRAPPER=/opt/homebrew/bin/sccache
+# export RUSTC_WRAPPER=/usr/bin/sccache
+# cargo build
+
 # Add the contents of this file to `config.toml` to enable "fast build" configuration. Please read the notes below.
 
 # NOTE: For maximum performance, build using a nightly compiler
