@@ -2,25 +2,15 @@ use bevy::prelude::*;
 use bevy_prototype_lyon::prelude::*;
 
 use crate::consts;
+use crate::resize::ResizeMarker;
 use crate::window;
 
 const RECTANGLE_MARGIN: f32 = 30.0;
 const RECTANGLE_WIDTH: f32 = 10.0;
 
-const LINE_WIDTH: f32 = 20.0;
+pub const LINE_WIDTH: f32 = 20.0;
 
-#[derive(Component)]
-pub struct RectangleMarker;
-
-pub fn draw_rectangle(
-    commands: &mut Commands,
-    windows: &Query<&Window>,
-    query: &Query<Entity, With<RectangleMarker>>,
-) {
-    query.iter().for_each(|entity| {
-        commands.entity(entity).despawn();
-    });
-
+pub fn draw_rectangle(commands: &mut Commands, windows: &Query<&Window>) {
     let window_size = window::get_window_size(windows);
     let scale = window::get_scale(window_size);
     let width = window_size.x - RECTANGLE_MARGIN * 2.0 * scale;
@@ -37,12 +27,9 @@ pub fn draw_rectangle(
             ..default()
         },
         Stroke::new(Color::WHITE, RECTANGLE_WIDTH * scale),
-        RectangleMarker,
+        ResizeMarker,
     ));
 }
-
-#[derive(Component)]
-pub struct LineMarker;
 
 fn spawn_line(commands: &mut Commands, start: Vec2, end: Vec2, color: Color, line_width: f32) {
     let shape = shapes::Line(start, end);
@@ -52,7 +39,7 @@ fn spawn_line(commands: &mut Commands, start: Vec2, end: Vec2, color: Color, lin
             ..default()
         },
         Stroke::new(color, line_width),
-        LineMarker,
+        ResizeMarker,
     ));
 }
 
@@ -75,15 +62,7 @@ fn draw_grid_lines(commands: &mut Commands, is_vertical: bool, board_size: f32, 
     }
 }
 
-pub fn draw_lines(
-    commands: &mut Commands,
-    windows: &Query<&Window>,
-    query: &Query<Entity, With<LineMarker>>,
-) {
-    query.iter().for_each(|entity| {
-        commands.entity(entity).despawn();
-    });
-
+pub fn draw_lines(commands: &mut Commands, windows: &Query<&Window>) {
     let window_size = window::get_window_size(windows);
     let board_size: f32 = window::get_board_size(window_size);
     let scale = window::get_scale(window_size);
