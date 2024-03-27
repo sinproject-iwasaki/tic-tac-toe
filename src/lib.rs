@@ -29,6 +29,7 @@ pub fn run() {
             // area::draw_rectangle,
         )
         .add_systems(Update, resize::resize_listener)
+        .add_systems(Update, area::button_events)
         .run();
 }
 
