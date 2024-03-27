@@ -1,18 +1,31 @@
 use bevy::prelude::*;
 
-use crate::{consts::LINE_MARGIN, lines};
+use crate::consts::GAME_MARGIN;
 
 pub fn get_window_size(windows: &Query<&Window>) -> Vec2 {
     let window = windows.single();
     Vec2::new(window.width(), window.height())
 }
 
-pub fn get_sizes(windows: &Query<&Window>) -> (f32, f32) {
-    let window_size = get_window_size(windows);
-    let min_size = window_size.x.min(window_size.y);
-    let scale = lines::get_scale(window_size);
-    let cell_size = ((min_size - LINE_MARGIN * 2.0 * scale) / 3.0).floor();
-    let half_size = min_size / 2.0;
+fn get_min_size(window_size: Vec2) -> f32 {
+    window_size.x.min(window_size.y)
+}
 
-    (cell_size, half_size)
+pub fn get_scale(window_size: Vec2) -> f32 {
+    let min_size = window_size.x.min(window_size.y);
+    let original_min_size = 900.0;
+
+    min_size / original_min_size
+}
+
+pub fn get_board_size(window_size: Vec2) -> f32 {
+    let min_size = get_min_size(window_size);
+    let scale = get_scale(window_size);
+    let margin = GAME_MARGIN * scale;
+
+    min_size - margin * 2.0
+}
+
+pub fn get_cell_size(board_size: f32) -> f32 {
+    board_size / 3.0
 }
