@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_prototype_lyon::prelude::*;
 
-use crate::{consts, lines, window};
+use crate::{consts, window};
 
 // use crate::{consts, window};
 
@@ -16,16 +16,14 @@ pub fn draw_circle(
     query: &Query<Entity, With<CircleMarker>>,
     cell_size: f32,
     line_width: f32,
+    margin: f32,
     color: Color,
-    scale: f32,
 ) {
     query.iter().for_each(|entity| {
         commands.entity(entity).despawn();
     });
 
-    let line_width = line_width * scale;
-    let margin_scale = MARK_MARGIN * scale;
-    let radius = (cell_size) / 2.0 - line_width - margin_scale;
+    let radius = (cell_size) / 2.0 - line_width - margin;
     let offset_x = 1.0 * cell_size;
     let offset_y = -1.0 * cell_size; // 左に1マス分のオフセット
 
@@ -56,16 +54,14 @@ pub fn draw_cross(
     query: &Query<Entity, With<CrossMarker>>,
     cell_size: f32,
     line_width: f32,
+    margin: f32,
     color: Color,
-    scale: f32,
 ) {
     query.iter().for_each(|entity| {
         commands.entity(entity).despawn();
     });
 
-    let mark_margin = MARK_MARGIN * scale;
-    let line_width = line_width * scale;
-    let half_size = (cell_size) / 2.0 - mark_margin - line_width * 3.0 / 4.0;
+    let half_size = (cell_size) / 2.0 - margin - line_width * 3.0 / 4.0;
 
     // バツの形を正しく描画するために、開始点と終了点を修正します。
     let line_1_start = Vec2::new(half_size, half_size);
@@ -106,11 +102,15 @@ pub fn draw_shapes(
     circle_query: &Query<Entity, With<CircleMarker>>,
     cross_query: &Query<Entity, With<CrossMarker>>,
 ) {
-    let (cell_size, _) = window::get_sizes(windows);
-    let color = consts::get_color();
     let window_size = window::get_window_size(windows);
-    let scale = lines::get_scale(window_size);
+    let board_size = window::get_board_size(window_size);
+    let cell_size = window::get_cell_size(board_size);
+    let window_size = window::get_window_size(windows);
+    let scale = window::get_scale(window_size);
+    let line_width = MARK_WIDTH * scale;
+    let margin = MARK_MARGIN * scale;
+    let color = consts::get_color();
 
-    draw_circle(commands, circle_query, cell_size, MARK_WIDTH, color, scale);
-    draw_cross(commands, cross_query, cell_size, MARK_WIDTH, color, scale);
+    draw_circle(commands, circle_query, cell_size, line_width, margin, color);
+    draw_cross(commands, cross_query, cell_size, line_width, margin, color);
 }
