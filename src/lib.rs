@@ -3,6 +3,7 @@
 mod area;
 mod consts;
 mod lines;
+mod resize;
 mod shapes;
 mod wasm;
 mod window;
@@ -21,12 +22,13 @@ pub fn run() {
             Startup,
             (
                 setup,
-                lines::draw_rectangle,
-                lines::draw_lines,
-                area::draw_rectangle,
-                shapes::draw_shapes,
+                // lines::draw_rectangle,
+                // lines::draw_lines,
+                // shapes::draw_shapes,
             ),
+            // area::draw_rectangle,
         )
+        .add_systems(Update, resize::resize_listener)
         .run();
 }
 
