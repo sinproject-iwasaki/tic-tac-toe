@@ -6,8 +6,15 @@ use bevy::{
 use crate::window;
 use crate::{lines::LINE_WIDTH, resize::ResizeMarker, shapes::MARK_MARGIN};
 
+#[derive(PartialEq, Eq)]
+enum ButtonsStatus {
+    Hovered,
+    Pressed,
+    Released,
+}
+
 #[derive(Component)]
-pub struct ButtonMarker(bool);
+pub struct ButtonMarker(ButtonsStatus);
 
 pub fn draw_rectangle(
     commands: &mut Commands,
@@ -33,7 +40,7 @@ pub fn draw_rectangle(
             ..default()
         },
         ResizeMarker,
-        ButtonMarker(false),
+        ButtonMarker(ButtonsStatus::Released),
     ));
 }
 
@@ -49,6 +56,7 @@ pub fn button_events(
         With<ButtonMarker>,
     >,
     mut materials: ResMut<Assets<ColorMaterial>>,
+    mouse_button_input: Res<ButtonInput<MouseButton>>,
     windows: Query<&Window>,
 ) {
     let window_size = window::get_window_size(&windows);
@@ -59,14 +67,10 @@ pub fn button_events(
     let line_width = LINE_WIDTH * scale;
     let mark_size = cell_size - line_width - margin * 2.0;
 
-    for ev in cursor_evr.read() {
-        // println!(
-        //     "New cursor position: X: {}, Y: {}, in Window ID: {:?}",
-        //     ev.position.x, ev.position.y, ev.window
-        // );
+    let is_pressed = mouse_button_input.pressed(MouseButton::Left);
 
+    for ev in cursor_evr.read() {
         for (_, transform, material_handle, mut tap_marker) in tap_marker_query.iter_mut() {
-            // println!("entity: {:?}", entity);
             let cursor_pos = ev.position;
             let cursor_pos = Vec2::new(
                 cursor_pos.x - window_size.x / 2.0,
@@ -75,22 +79,23 @@ pub fn button_events(
 
             let marker_pos = transform.translation;
 
-            // println!("cursor_pos: {}, marker_pos: {}", cursor_pos, marker_pos);
-
             let is_hovered: bool = (cursor_pos.x - marker_pos.x).abs() < mark_size / 2.0
                 && (cursor_pos.y - marker_pos.y).abs() < mark_size / 2.0;
 
-            if !tap_marker.0 && is_hovered {
-                println!("Hit");
-                tap_marker.0 = true;
+            if tap_marker.0 != ButtonsStatus::Pressed && is_hovered && is_pressed {
+                tap_marker.0 = ButtonsStatus::Pressed;
+
+                if let Some(material) = materials.get_mut(material_handle) {
+                    *material = ColorMaterial::from(Color::rgb_u8(128, 255, 128));
+                }
+            } else if tap_marker.0 != ButtonsStatus::Hovered && is_hovered && !is_pressed {
+                tap_marker.0 = ButtonsStatus::Hovered;
 
                 if let Some(material) = materials.get_mut(material_handle) {
                     *material = ColorMaterial::from(Color::rgb_u8(0, 255, 0));
-                    // 色を緑に変更
                 }
-            } else if tap_marker.0 && !is_hovered {
-                println!("Miss");
-                tap_marker.0 = false;
+            } else if tap_marker.0 != ButtonsStatus::Released && !is_hovered {
+                tap_marker.0 = ButtonsStatus::Released;
 
                 if let Some(material) = materials.get_mut(material_handle) {
                     *material = ColorMaterial::from(Color::rgb_u8(255, 0, 128));
