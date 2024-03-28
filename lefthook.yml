@@ -1,3 +1,4 @@
+#CONFLICT CHECK
 pre-commit:
   parallel: true
   commands:
