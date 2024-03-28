@@ -24,14 +24,17 @@ pre-push:
       run: |
         echo "Checking for conflicts with the remote main branch..."
 
-        git fetch origin main
+        git fetch origin main:main
 
-        if git merge-base --is-ancestor HEAD origin/main; then
-          echo "No conflicts detected. Proceeding with push."
-        else
+        CONFLICTS=$(git diff --name-only --diff-filter=U)
+
+        if [ -n "$CONFLICTS" ]; then
           echo "Error: Conflicts detected with the remote main branch."
           echo "Please resolve conflicts before pushing again."
+          echo "$CONFLICTS"
           exit 1
+        else
+          echo "No conflicts detected. Proceeding with push."
         fi
     cargo-audit:
       run: cargo audit
