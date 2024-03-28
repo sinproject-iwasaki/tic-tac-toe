@@ -26,14 +26,13 @@ pre-push:
 
         git fetch origin main:main
 
-        CONFLICTS=$(git diff --name-only --diff-filter=U)
-
-        if [ -n "$CONFLICTS" ]; then
+        if ! git merge origin/main --no-commit --no-ff; then
+          git merge --abort
           echo "Error: Conflicts detected with the remote main branch."
           echo "Please resolve conflicts before pushing again."
-          echo "$CONFLICTS"
           exit 1
         else
+          git merge --abort
           echo "No conflicts detected. Proceeding with push."
         fi
     cargo-audit:
