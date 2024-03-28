@@ -2,6 +2,16 @@
 pre-commit:
   parallel: true
   commands:
+    block-main-branch-commit:
+      run: |
+        current_branch="$(git branch --show-current)"
+
+        if [ "$current_branch" = "main" ]; then
+          echo "Error: Direct commits to the main branch are not allowed."
+          exit 1
+        else
+          echo "This is not the main branch, so commits are allowed."
+        fi
     cargo-clippy:
       run: cargo clippy -- -D warnings
     cargo-fmt:
@@ -11,6 +21,21 @@ pre-commit:
 pre-push:
   parallel: true
   commands:
+    check-for-conflicts:
+      run: |
+        echo "Checking for conflicts with the remote main branch..."
+
+        git fetch origin main:main
+
+        if ! git merge origin/main --no-commit --no-ff; then
+          git merge --abort
+          echo "Error: Conflicts detected with the remote main branch."
+          echo "Please resolve conflicts before pushing again."
+          exit 1
+        else
+          git merge --abort
+          echo "No conflicts detected. Proceeding with push."
+        fi
     cargo-audit:
       run: cargo audit
     cargo-outdated:
